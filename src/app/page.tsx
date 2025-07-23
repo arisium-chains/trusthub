@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WalletConnectButton } from '@/components/WalletConnectButton';
+import { TRHBalanceDisplay } from '@/components/TRHBalance';
 import { useWallet } from '@/hooks/useWallet';
 import { Search, Star, TrendingUp, Clock } from 'lucide-react';
 import { trendingBusinesses, newBusinesses } from '@/lib/mock-data';
@@ -16,8 +17,10 @@ export default function Home() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement search functionality
-    console.log('Searching for:', searchQuery);
+    // Redirect to explore page with search query
+    if (searchQuery.trim()) {
+      window.location.href = `/explore?q=${encodeURIComponent(searchQuery.trim())}`;
+    }
   };
 
   return (
@@ -31,7 +34,7 @@ export default function Home() {
               <Link href="/" className="text-gray-600 hover:text-gray-900">
                 Reviewr
               </Link>
-              <Link href="/businesses" className="text-gray-600 hover:text-gray-900">
+              <Link href="/register-business" className="text-gray-600 hover:text-gray-900">
                 For Businesses
               </Link>
             </nav>
@@ -78,9 +81,16 @@ export default function Home() {
       ) : (
         <section className="py-12 px-4">
           <div className="container mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Discover the best of Web3
-            </h2>
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+              <h2 className="text-3xl font-bold text-gray-900">
+                Discover the best of Web3
+              </h2>
+              {isConnected && (
+                <div className="lg:w-80">
+                  <TRHBalanceDisplay compact={true} />
+                </div>
+              )}
+            </div>
             
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mb-12">

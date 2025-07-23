@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-// import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { WalletConnectButton } from '@/components/WalletConnectButton';
 import { ReviewCard } from '@/components/ReviewCard';
+import { WorldIDVerification } from '@/components/WorldIDVerification';
+import { TRHBalanceDisplay } from '@/components/TRHBalance';
 import { useWallet } from '@/hooks/useWallet';
 import { ArrowLeft, Award, Gift, TrendingUp, Trophy } from 'lucide-react';
 import { mockUserProfile, mockBusinesses } from '@/lib/mock-data';
@@ -15,7 +17,7 @@ import Link from 'next/link';
 
 export default function ProfilePage() {
   const { isConnected, account } = useWallet();
-  const [activeTab, setActiveTab] = useState('reviews');
+  const [activeTab, setActiveTab] = useState('overview');
 
   if (!isConnected) {
     return (
@@ -56,11 +58,11 @@ export default function ProfilePage() {
             <Card className="mb-6">
               <CardHeader className="text-center">
                 <div className="relative mx-auto mb-4">
-                  <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl flex items-center justify-center">
-                    <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center">
-                      <Trophy className="h-8 w-8 text-orange-600" />
-                    </div>
-                  </div>
+                  <Avatar className="w-24 h-24 mx-auto">
+                    <AvatarFallback className="text-2xl bg-gradient-to-br from-orange-400 to-pink-500">
+                      {account?.address?.slice(2, 4).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 <CardTitle className="text-xl">
                   {account?.address?.slice(0, 6)}...{account?.address?.slice(-4)}
@@ -132,10 +134,21 @@ export default function ProfilePage() {
           {/* Right Column - Tabs */}
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="reviews">My Reviews</TabsTrigger>
                 <TabsTrigger value="stats">My Stats</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="overview" className="mt-6">
+                <div className="space-y-6">
+                  {/* TRH Balance */}
+                  <TRHBalanceDisplay showTransactions={true} />
+                  
+                  {/* World ID Verification */}
+                  <WorldIDVerification />
+                </div>
+              </TabsContent>
 
               <TabsContent value="reviews" className="mt-6">
                 <div className="space-y-4">

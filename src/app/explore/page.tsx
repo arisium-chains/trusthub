@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WalletConnectButton } from '@/components/WalletConnectButton';
-import { useWallet } from '@/hooks/useWallet';
 import { Search, Star, Filter, ArrowLeft, MapPin } from 'lucide-react';
 import { mockBusinesses, type Business } from '@/lib/mock-data';
 import Link from 'next/link';
+import { SearchParamsHandler } from '@/components/SearchParamsHandler';
 
 const categories = [
   'All Categories',
@@ -30,9 +30,7 @@ const sortOptions = [
   { value: 'name', label: 'Alphabetical' }
 ];
 
-export default function ExplorePage() {
-  const { isConnected } = useWallet();
-  const [searchQuery, setSearchQuery] = useState('');
+function ExploreContent({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (query: string) => void; }) {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [sortBy, setSortBy] = useState('rating');
   const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>(mockBusinesses);
@@ -42,7 +40,7 @@ export default function ExplorePage() {
     applyFilters();
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...mockBusinesses];
 
     // Apply search filter
@@ -76,12 +74,11 @@ export default function ExplorePage() {
     });
 
     setFilteredBusinesses(filtered);
-  };
-
-  // Apply filters whenever filter criteria change
-  useState(() => {
-    applyFilters();
   }, [searchQuery, selectedCategory, sortBy]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [searchQuery, selectedCategory, sortBy, applyFilters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -249,5 +246,16 @@ export default function ExplorePage() {
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchParamsHandler onSearchQueryChange={setSearchQuery} />
+      <ExploreContent searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+    </Suspense>
   );
 }

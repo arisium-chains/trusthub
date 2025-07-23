@@ -1,8 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Decentralized Community Review Platform (DCRP)
+
+This is a Next.js project for the Decentralized Community Review Platform, a transparent and censorship-resistant alternative to traditional review platforms.
+
+## Features
+
+- Wallet-based authentication
+- Business registration and profile management
+- Review submission with cryptographic verification
+- Business response system
+- TRH token rewards system
+- World ID verification integration
+- Business promotion options
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -31,6 +55,38 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
+### Automatic Deployment with Vercel
+
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+2. Sign in to Vercel
+3. Create a new project and import your Git repository
+4. Vercel will automatically detect the Next.js framework and configure the build settings
+5. Click "Deploy" and your site will be live in minutes
+
+### Manual Deployment
+
+To deploy manually, you can build and export the static files:
+
+```bash
+npm run build
+# This will create a .next directory with the production build
+```
+
+Then deploy the contents of the `.next` directory to your preferred hosting platform.
+
+## Environment Variables
+
+For production deployment, you may need to set the following environment variables:
+
+- `NEXT_PUBLIC_WORLD_ID_APP_ID` - Your World ID app ID
+- Any other environment variables required for your specific deployment
+
+## Project Structure
+
+- `/app` - Next.js app router pages
+- `/components` - Reusable UI components
+- `/hooks` - Custom React hooks
+- `/lib` - Utility functions and business logic
+- `/store` - Global state management with Zustand

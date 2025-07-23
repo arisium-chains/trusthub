@@ -3,13 +3,20 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Star, ThumbsUp, ThumbsDown, Shield } from 'lucide-react';
+import { 
+  Star, 
+  ThumbsUp, 
+  ThumbsDown, 
+  Shield, 
+  Flag
+} from 'lucide-react';
 import { Review } from '@/lib/mock-data';
+import { toast } from 'sonner';
 
 interface ReviewCardProps {
   review: Review;
   showReplyButton?: boolean;
-  onReply?: (reviewId: string) => void;
+  onReply?: (review: Review) => void;
 }
 
 export const ReviewCard = ({ review, showReplyButton = false, onReply }: ReviewCardProps) => {
@@ -22,6 +29,11 @@ export const ReviewCard = ({ review, showReplyButton = false, onReply }: ReviewC
         }`}
       />
     ));
+  };
+
+  const handleReport = () => {
+    toast.info('Review reported for moderation');
+    // In a real implementation, this would call an API to report the review
   };
 
   return (
@@ -47,15 +59,24 @@ export const ReviewCard = ({ review, showReplyButton = false, onReply }: ReviewC
               <p className="text-xs text-gray-500">{review.timestamp}</p>
             </div>
           </div>
-          {showReplyButton && onReply && (
-            <Button
-              variant="outline"
+          <div className="flex items-center gap-2">
+            {showReplyButton && onReply && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onReply(review)}
+              >
+                Reply
+              </Button>
+            )}
+            <Button 
+              variant="ghost" 
               size="sm"
-              onClick={() => onReply(review.id)}
+              onClick={handleReport}
             >
-              Reply
+              <Flag className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">

@@ -14,8 +14,15 @@ import {
 } from '@/components/ui/dialog';
 import { RatingStars } from './RatingStars';
 import { useWallet } from '@/hooks/useWallet';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Coins } from 'lucide-react';
 import { toast } from 'sonner';
+import { 
+  trhTokenManager, 
+  calculateReviewQuality, 
+  calculateReviewReward,
+  formatTRHAmount
+} from '@/lib/trh-token';
+import { isWorldIDVerified } from '@/lib/worldid';
 
 interface WriteReviewModalProps {
   open: boolean;
@@ -25,6 +32,13 @@ interface WriteReviewModalProps {
 }
 
 type SubmissionState = 'idle' | 'signing' | 'submitting' | 'success';
+
+interface RewardInfo {
+  baseReward: number;
+  qualityMultiplier: number;
+  bonuses: string[];
+  totalReward: number;
+}
 
 export const WriteReviewModal = ({ 
   open, 
@@ -37,6 +51,7 @@ export const WriteReviewModal = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle');
+  const [rewardInfo, setRewardInfo] = useState<RewardInfo | null>(null);
 
   const resetForm = () => {
     setRating(0);
@@ -88,9 +103,40 @@ export const WriteReviewModal = ({
         type: 'submitReview',
         data: reviewData,
       });
+
+      // Calculate TRH reward
+      const qualityScore = calculateReviewQuality(
+        content.length,
+        0, // No helpful votes yet for new review
+        false, // No media support yet
+        30, // Mock account age
+        false // Not first reviewer (for demo)
+      );
+
+      const reward = calculateReviewReward(qualityScore, false);
+      
+      // Award TRH tokens
+      await trhTokenManager.awardTokens(
+        reward,
+        `Review reward for ${businessName}`,
+        'review_reward',
+        reviewData.timestamp
+      );
+
+      // Calculate reward info for display
+      const bonuses = [];
+      if (isWorldIDVerified()) bonuses.push('+5 TRH World ID bonus');
+      if (qualityScore.multiplier > 1.5) bonuses.push('High quality review bonus');
+      
+      setRewardInfo({
+        baseReward: 10,
+        qualityMultiplier: qualityScore.multiplier,
+        bonuses,
+        totalReward: reward
+      });
       
       setSubmissionState('success');
-      toast.success('Review submitted successfully!');
+      toast.success(`Review submitted! Earned ${formatTRHAmount(reward)}`);
       
       // Auto-close after success
       setTimeout(() => {
@@ -121,11 +167,52 @@ export const WriteReviewModal = ({
           <div className="flex flex-col items-center justify-center py-8">
             <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Success!
+              Review Published!
             </h3>
-            <p className="text-sm text-gray-600 text-center">
-              Your review is published and verified on the blockchain.
+            <p className="text-sm text-gray-600 text-center mb-4">
+              Your review is verified on the blockchain.
             </p>
+            
+            {rewardInfo && (
+              <div className="w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Coins className="h-5 w-5 text-purple-600" />
+                  <span className="font-semibold text-purple-900">TRH Reward Earned</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Base reward:</span>
+                    <span className="font-medium">{formatTRHAmount(rewardInfo.baseReward)}</span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Quality multiplier:</span>
+                    <span className="font-medium">{rewardInfo.qualityMultiplier.toFixed(1)}x</span>
+                  </div>
+                  
+                  {rewardInfo.bonuses.length > 0 && (
+                    <div className="text-sm">
+                      <span className="text-gray-600">Bonuses:</span>
+                      <ul className="mt-1 ml-4">
+                        {rewardInfo.bonuses.map((bonus, index) => (
+                          <li key={index} className="text-green-600 text-xs">• {bonus}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <div className="border-t border-purple-200 pt-2 mt-3">
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-purple-900">Total earned:</span>
+                      <span className="font-bold text-purple-900 text-lg">
+                        {formatTRHAmount(rewardInfo.totalReward)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
