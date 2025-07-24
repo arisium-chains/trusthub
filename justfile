@@ -54,15 +54,44 @@ open:
 # Download PocketBase binary
 install-pocketbase:
     #!/usr/bin/env bash
-    echo "📥 Downloading PocketBase..."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        curl -L https://github.com/pocketbase/pocketbase/releases/download/v0.21.5/pocketbase_0.21.5_darwin_amd64.zip -o pocketbase.zip
-    else
-        curl -L https://github.com/pocketbase/pocketbase/releases/download/v0.21.5/pocketbase_0.21.5_linux_amd64.zip -o pocketbase.zip
+    echo "📥 Installing dependencies and downloading PocketBase..."
+    
+    # Install unzip if not available
+    if ! command -v unzip &> /dev/null; then
+        echo "Installing unzip..."
+        if command -v apt-get &> /dev/null; then
+            apt-get update && apt-get install -y unzip curl
+        elif command -v yum &> /dev/null; then
+            yum install -y unzip curl
+        elif command -v apk &> /dev/null; then
+            apk add unzip curl
+        fi
     fi
-    unzip pocketbase.zip && rm pocketbase.zip
-    chmod +x pocketbase
-    echo "✅ PocketBase installed! Run 'just pocketbase' to start"
+    
+    # Download PocketBase
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        curl -L "https://github.com/pocketbase/pocketbase/releases/download/v0.21.5/pocketbase_0.21.5_darwin_amd64.zip" -o pocketbase.zip
+    else
+        curl -L "https://github.com/pocketbase/pocketbase/releases/download/v0.21.5/pocketbase_0.21.5_linux_amd64.zip" -o pocketbase.zip
+    fi
+    
+    # Check if download was successful
+    if [ ! -f "pocketbase.zip" ] || [ ! -s "pocketbase.zip" ]; then
+        echo "❌ Download failed. Trying alternative method..."
+        rm -f pocketbase.zip
+        wget "https://github.com/pocketbase/pocketbase/releases/download/v0.21.5/pocketbase_0.21.5_linux_amd64.zip" -O pocketbase.zip
+    fi
+    
+    # Extract and setup
+    if [ -f "pocketbase.zip" ] && [ -s "pocketbase.zip" ]; then
+        unzip -o pocketbase.zip
+        rm pocketbase.zip
+        chmod +x pocketbase
+        echo "✅ PocketBase installed! Run 'just pocketbase' to start"
+    else
+        echo "❌ Failed to download PocketBase. Please check your internet connection."
+        exit 1
+    fi
 
 # Run PocketBase publicly
 pocketbase:
