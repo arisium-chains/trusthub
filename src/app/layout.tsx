@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reviewr - Decentralized Community Review Platform",
+  title: "TrustHub - Decentralized Community Review Platform",
   description: "Honest reviews, backed by the blockchain. Discover trustworthy businesses through verified, decentralized reviews that can't be manipulated or censored.",
 };
 

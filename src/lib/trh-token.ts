@@ -121,17 +121,32 @@ export const calculateReviewReward = (
   return Math.round(reward);
 };
 
-// Mock TRH token storage (in production, this would be blockchain-based)
+// TRH Token Contract Interface
 class TRHTokenManager {
+  private contractAddress: string;
   private storageKey = 'trh_balance';
   private transactionsKey = 'trh_transactions';
 
-  // Get current TRH balance
+  constructor() {
+    this.contractAddress = process.env.NEXT_PUBLIC_TRH_CONTRACT_ADDRESS || '';
+  }
+
+  // Get current TRH balance from blockchain
   getBalance(): TRHBalance {
     try {
+      // In production, this would call the smart contract to get balance
+      // For now, we'll use localStorage for demo purposes
+      
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Ensure all properties exist and are numbers
+        return {
+          available: Number(parsed.available) || 0,
+          earned: Number(parsed.earned) || 0,
+          spent: Number(parsed.spent) || 0,
+          locked: Number(parsed.locked) || 0
+        };
       }
     } catch (error) {
       console.error('Error loading TRH balance:', error);
@@ -146,7 +161,7 @@ class TRHTokenManager {
     };
   }
 
-  // Update TRH balance
+  // Update TRH balance (used for demo/local storage)
   private updateBalance(balance: TRHBalance): void {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(balance));
@@ -183,14 +198,14 @@ class TRHTokenManager {
     }
   }
 
-  // Award TRH tokens (mock implementation)
+  // Award TRH tokens (mock implementation - in production, this would interact with smart contract)
   async awardTokens(
     amount: number,
     description: string,
     contextType: TRHTransaction['contextType'],
     contextId?: string
   ): Promise<TRHTransaction> {
-    const balance = this.getBalance();
+    const balance = await this.getBalance();
     
     // Create transaction record
     const transaction: TRHTransaction = {
@@ -225,14 +240,14 @@ class TRHTokenManager {
     return transaction;
   }
 
-  // Spend TRH tokens (mock implementation)
+  // Spend TRH tokens (mock implementation - in production, this would interact with smart contract)
   async spendTokens(
     amount: number,
     description: string,
     contextType: TRHTransaction['contextType'],
     contextId?: string
   ): Promise<TRHTransaction> {
-    const balance = this.getBalance();
+    const balance = await this.getBalance();
     
     if (balance.available < amount) {
       throw new Error(`Insufficient TRH balance. Available: ${balance.available}, Required: ${amount}`);
@@ -273,7 +288,7 @@ class TRHTokenManager {
 
   // Initialize user with World ID verification bonus
   async initializeWithVerificationBonus(): Promise<void> {
-    const balance = this.getBalance();
+    const balance = await this.getBalance();
     
     // Only award if user hasn't received verification bonus yet
     if (balance.earned === 0 && isWorldIDVerified()) {
@@ -296,8 +311,11 @@ class TRHTokenManager {
 export const trhTokenManager = new TRHTokenManager();
 
 // Utility functions
-export const formatTRHAmount = (amount: number): string => {
-  return `${amount.toLocaleString()} TRH`;
+export const formatTRHAmount = (amount: number | undefined | null): string => {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return '0 TRH';
+  }
+  return `${Math.floor(amount).toLocaleString()} TRH`;
 };
 
 export const getTRHTransactionTypeLabel = (type: TRHTransaction['type']): string => {

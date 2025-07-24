@@ -29,10 +29,10 @@ export default function Home() {
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <h1 className="text-2xl font-bold text-gray-900">Reviewr</h1>
+            <h1 className="text-2xl font-bold text-gray-900">TrustHub</h1>
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
-                Reviewr
+                Home
               </Link>
               <Link href="/register-business" className="text-gray-600 hover:text-gray-900">
                 For Businesses
@@ -83,7 +83,7 @@ export default function Home() {
           <div className="container mx-auto">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
               <h2 className="text-3xl font-bold text-gray-900">
-                Discover the best of Web3
+                Welcome to TrustHub
               </h2>
               {isConnected && (
                 <div className="lg:w-80">

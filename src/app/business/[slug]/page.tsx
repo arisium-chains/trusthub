@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WalletConnectButton } from '@/components/WalletConnectButton';
@@ -15,24 +15,83 @@ import {
   Globe, 
   Star, 
   MessageSquare,
-  Shield
+  Shield,
+  Loader2
 } from 'lucide-react';
 import { mockBusinesses, mockReviews, type Review } from '@/lib/mock-data';
+import { pb } from '@/lib/pocketbase-production';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export default function BusinessProfilePage({ params }: { params: any }) { // eslint-disable-line @typescript-eslint/no-explicit-any
+interface Business {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  website: string;
+  category: string;
+  logo: string;
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}
+
+export default function BusinessProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  // Unwrap the params Promise using React.use()
+  const { slug } = use(params);
+  
   const { isConnected, account } = useWallet();
-  const [business, setBusiness] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [reviews, setReviews] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [showWriteReview, setShowWriteReview] = useState(false);
   const [showBusinessResponse, setShowBusinessResponse] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [isBusinessOwner, setIsBusinessOwner] = useState(false);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  // Function to load reviews from PocketBase
+  const loadReviews = async (businessId: string) => {
+    setLoadingReviews(true);
+    try {
+      const pocketbaseReviews = await pb.getReviewsForBusiness(businessId);
+      
+      // Convert PocketBase reviews to match mock data format
+      const convertedReviews: Review[] = pocketbaseReviews.map(review => ({
+        id: review.id,
+        businessId: review.business_id,
+        reviewerAddress: review.reviewer_address,
+        reviewerName: `${review.reviewer_address.slice(0, 6)}...${review.reviewer_address.slice(-4)}`,
+        rating: review.rating,
+        title: review.title || '',
+        content: review.content,
+        timestamp: review.created,
+        verified: review.world_id_verified,
+        likes: 0, // No likes tracked yet
+        dislikes: 0, // No dislikes tracked yet
+        businessResponse: undefined // No business responses yet
+      }));
+      
+      setReviews(convertedReviews);
+      console.log(`✅ Loaded ${convertedReviews.length} reviews from PocketBase`);
+    } catch (error) {
+      console.error('❌ Failed to load reviews from PocketBase:', error);
+      // Fallback to mock data
+      const businessReviews = mockReviews.filter(r => r.businessId === businessId);
+      setReviews(businessReviews);
+      console.log('↩️ Falling back to mock data');
+    }
+    setLoadingReviews(false);
+  };
 
   useEffect(() => {
     // Find business by slug
-    const foundBusiness = mockBusinesses.find(b => b.slug === params.slug);
+    const foundBusiness = mockBusinesses.find(b => b.slug === slug);
     
     if (!foundBusiness) {
       notFound();
@@ -41,19 +100,25 @@ export default function BusinessProfilePage({ params }: { params: any }) { // es
     
     setBusiness(foundBusiness);
     
-    // Filter reviews for this business
-    const businessReviews = mockReviews.filter(r => r.businessId === foundBusiness.id);
-    setReviews(businessReviews);
+    // Load reviews from PocketBase
+    loadReviews(foundBusiness.id);
     
     // Check if current user is the business owner (mock implementation)
     // In a real app, this would check against the business owner's wallet address
     setIsBusinessOwner(isConnected && account?.address === '0x1234...5678');
-  }, [params.slug, isConnected, account]);
+  }, [slug, isConnected, account]);
 
   const handleReviewReply = (review: Review) => {
     if (!isBusinessOwner) return;
     setSelectedReview(review);
     setShowBusinessResponse(true);
+  };
+
+  // Callback to refresh reviews after new review is submitted
+  const handleReviewSubmitted = () => {
+    if (business) {
+      loadReviews(business.id);
+    }
   };
 
   if (!business) {
@@ -185,7 +250,7 @@ export default function BusinessProfilePage({ params }: { params: any }) { // es
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              Reviews ({reviews.length})
+              Reviews ({loadingReviews ? '...' : reviews.length})
             </h2>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Shield className="h-4 w-4" />
@@ -193,7 +258,12 @@ export default function BusinessProfilePage({ params }: { params: any }) { // es
             </div>
           </div>
           
-          {reviews.length > 0 ? (
+          {loadingReviews ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              <span className="ml-2 text-gray-600">Loading reviews...</span>
+            </div>
+          ) : reviews.length > 0 ? (
             <div className="space-y-6">
               {reviews.map((review) => (
                 <ReviewCard 
@@ -232,6 +302,7 @@ export default function BusinessProfilePage({ params }: { params: any }) { // es
           onOpenChange={setShowWriteReview}
           businessName={business.name}
           businessId={business.id}
+          onReviewSubmitted={handleReviewSubmitted}
         />
       )}
 

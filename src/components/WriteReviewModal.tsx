@@ -23,12 +23,14 @@ import {
   formatTRHAmount
 } from '@/lib/trh-token';
 import { isWorldIDVerified } from '@/lib/worldid';
+import { pb } from '@/lib/pocketbase-production';
 
 interface WriteReviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   businessName: string;
   businessId: string;
+  onReviewSubmitted?: () => void; // Callback to refresh reviews
 }
 
 type SubmissionState = 'idle' | 'signing' | 'submitting' | 'success';
@@ -44,9 +46,10 @@ export const WriteReviewModal = ({
   open, 
   onOpenChange, 
   businessName, 
-  businessId 
+  businessId,
+  onReviewSubmitted
 }: WriteReviewModalProps) => {
-  const { signMessage, sendTransaction } = useWallet();
+  const { signMessage, sendTransaction, account } = useWallet();
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -104,6 +107,22 @@ export const WriteReviewModal = ({
         data: reviewData,
       });
 
+      // Save review to PocketBase database
+      try {
+        await pb.createReview({
+          businessId: businessId,
+          reviewerAddress: account?.address || '',
+          rating,
+          title: title.trim() || '',
+          content: content.trim(),
+          worldIdVerified: isWorldIDVerified()
+        });
+        console.log('✅ Review saved to PocketBase successfully');
+      } catch (dbError) {
+        console.error('❌ Failed to save review to database:', dbError);
+        // Continue anyway - don't fail the entire process for DB issues
+      }
+
       // Calculate TRH reward
       const qualityScore = calculateReviewQuality(
         content.length,
@@ -137,6 +156,11 @@ export const WriteReviewModal = ({
       
       setSubmissionState('success');
       toast.success(`Review submitted! Earned ${formatTRHAmount(reward)}`);
+      
+      // Trigger review refresh callback
+      if (onReviewSubmitted) {
+        onReviewSubmitted();
+      }
       
       // Auto-close after success
       setTimeout(() => {

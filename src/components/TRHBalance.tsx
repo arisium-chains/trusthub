@@ -41,13 +41,26 @@ export const TRHBalanceDisplay = ({
   // Load balance and transactions
   useEffect(() => {
     if (isConnected) {
-      const loadData = () => {
-        const currentBalance = trhTokenManager.getBalance();
-        const currentTransactions = trhTokenManager.getTransactions();
-        
-        setBalance(currentBalance);
-        setTransactions(currentTransactions);
-        setLoading(false);
+      const loadData = async () => {
+        try {
+          const currentBalance = trhTokenManager.getBalance();
+          const currentTransactions = trhTokenManager.getTransactions();
+          
+          setBalance(currentBalance);
+          setTransactions(currentTransactions);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error loading TRH data:', error);
+          // Set default balance on error
+          setBalance({
+            available: 0,
+            earned: 0,
+            spent: 0,
+            locked: 0
+          });
+          setTransactions([]);
+          setLoading(false);
+        }
       };
 
       loadData();
@@ -55,6 +68,8 @@ export const TRHBalanceDisplay = ({
       // Initialize with verification bonus if applicable
       trhTokenManager.initializeWithVerificationBonus().then(() => {
         loadData(); // Reload after potential bonus
+      }).catch(error => {
+        console.error('Error initializing verification bonus:', error);
       });
 
       // Refresh data periodically
@@ -131,7 +146,7 @@ export const TRHBalanceDisplay = ({
               </div>
               <div>
                 <CardTitle className="text-lg">TRH Balance</CardTitle>
-                <CardDescription>Trust Review Hub Tokens</CardDescription>
+                <CardDescription>TrustHub Tokens</CardDescription>
               </div>
             </div>
             <Button
