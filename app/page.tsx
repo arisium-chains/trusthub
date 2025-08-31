@@ -50,7 +50,7 @@ export default async function Page() {
             <div className="text-sm text-muted-foreground">No reviews yet.</div>
           )}
           {recent.map((r: any) => (
-            <ReviewCard key={r.id} review={{ id: r.id, user: r.user, rating: r.rating, comment: r.comment, createdAt: r.created, verified: Boolean(r.txHash) }} />
+            <ReviewCard key={r.id} review={{ id: r.id, user: r.user, rating: r.rating, comment: r.comment, createdAt: r.created, verified: Boolean(r.txHash) } as any} />
           ))}
         </div>
       </section>

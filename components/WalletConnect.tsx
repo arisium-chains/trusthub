@@ -13,9 +13,9 @@ export default function WalletConnect() {
     setLoading(true);
     setError(null);
     try {
-      const addr = await connectWallet();
-      setAddress(addr);
-      await updateWalletAddress(addr);
+      const { address, signature } = await connectWallet(true);
+      setAddress(address);
+      await updateWalletAddress(address, signature);
     } catch (e: any) {
       setError(e?.message || String(e));
     } finally {

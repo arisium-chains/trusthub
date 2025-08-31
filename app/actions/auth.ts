@@ -28,11 +28,11 @@ export async function getCurrentUser() {
   return pb.authStore?.model || null;
 }
 
-export async function updateWalletAddress(wallet: string) {
+export async function updateWalletAddress(wallet: string, signature?: string) {
   const pb = getServerPB();
   const user = pb.authStore?.model;
   if (!user) throw new Error("Not authenticated");
-  const verification = { ...(user.verification || {}), wallet };
+  const verification = { ...(user.verification || {}), wallet, signature };
   const updated = await pb.collection("users").update(user.id, { verification });
   return updated;
 }

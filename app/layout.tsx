@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "TrustHub",
@@ -36,6 +37,7 @@ export default function RootLayout({
             <div className="container">© {new Date().getFullYear()} TrustHub</div>
           </footer>
         </div>
+        <Toaster />
       </body>
     </html>
   );

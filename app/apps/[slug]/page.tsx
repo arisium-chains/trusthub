@@ -46,7 +46,6 @@ export default async function AppDetail({ params }: { params: { slug: string } }
           {reviews.length === 0 && (
             <div className="text-sm text-muted-foreground">No reviews yet.</div>
           )}
-          {/* Map PocketBase records to ReviewCard props */}
           {reviews.map((r: any) => (
             <ReviewCard
               key={r.id}
@@ -57,8 +56,8 @@ export default async function AppDetail({ params }: { params: { slug: string } }
                 rating: r.rating,
                 comment: r.comment,
                 createdAt: r.created,
-                verified: Boolean(r.txHash),
-              }}
+                verified: Boolean(r.txHash) || Boolean(r.expand?.user?.verification?.wallet),
+              } as any}
             />
           ))}
         </div>

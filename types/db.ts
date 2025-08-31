@@ -30,6 +30,12 @@ export type Review = {
   txHash?: string;
   status: ReviewStatus;
   created: string; // ISO
+  // Wallet verification fields
+  walletAddress?: string;
+  signature?: string;
+  signatureMessage?: string;
+  signatureVerified?: boolean;
+  worldIdVerified?: boolean;
 };
 
 export type Aggregate = {

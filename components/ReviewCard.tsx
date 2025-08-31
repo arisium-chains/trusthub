@@ -1,15 +1,9 @@
 "use client";
 import React from "react";
+import { VerifiedBadge, getVerificationLevelFromReview } from "@/components/ui/verified-badge";
+import type { Review } from "@/types/db";
 
-export type Review = {
-  id: string;
-  user: string;
-  avatarUrl?: string;
-  rating: number; // 1-5
-  comment: string;
-  createdAt: string; // ISO date
-  verified?: boolean;
-};
+export type { Review };
 
 export function ReviewCard({ review }: { review: Review }) {
   return (
@@ -17,7 +11,7 @@ export function ReviewCard({ review }: { review: Review }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img
-            src={review.avatarUrl || "https://api.dicebear.com/8.x/identicon/svg?seed=" + encodeURIComponent(review.user)}
+            src={"https://api.dicebear.com/8.x/identicon/svg?seed=" + encodeURIComponent(review.user)}
             alt={review.user}
             width={32}
             height={32}
@@ -31,8 +25,8 @@ export function ReviewCard({ review }: { review: Review }) {
       </div>
       <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
       <div className="flex items-center justify-between mt-2">
-        <time className="text-xs text-muted-foreground" dateTime={review.createdAt}>{new Date(review.createdAt).toLocaleDateString()}</time>
-        {review.verified && <span className="inline-flex items-center rounded-full bg-gray-200 text-gray-800 px-2.5 py-0.5 text-xs font-semibold">Verified</span>}
+        <time className="text-xs text-muted-foreground" dateTime={review.created}>{new Date(review.created).toLocaleDateString()}</time>
+        <VerifiedBadge level={getVerificationLevelFromReview(review)} />
       </div>
     </article>
   );

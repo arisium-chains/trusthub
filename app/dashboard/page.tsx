@@ -44,7 +44,7 @@ export default async function Dashboard() {
           {!user && <div className="text-sm text-muted-foreground">Please log in to see your reviews.</div>}
           {user && myReviews.length === 0 && <div className="text-sm text-muted-foreground">You haven&apos;t posted any reviews yet.</div>}
           {user && myReviews.map((r: any) => (
-            <ReviewCard key={r.id} review={{ id: r.id, user: user.name || user.email || 'You', rating: r.rating, comment: r.comment, createdAt: r.created, verified: Boolean(r.txHash) }} />
+            <ReviewCard key={r.id} review={{ id: r.id, user: user.name || user.email || 'You', rating: r.rating, comment: r.comment, createdAt: r.created, verified: Boolean(r.txHash) } as any} />
           ))}
           <div>
             <Button asChild><Link href="/reviews/new">Write New Review</Link></Button>

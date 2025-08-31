@@ -1,0 +1,448 @@
+{
+  "collections": [
+    {
+      "id": "users",
+      "name": "users",
+      "type": "auth",
+      "system": false,
+      "schema": [
+        {
+          "id": "users_name",
+          "name": "name",
+          "type": "text",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "users_avatar",
+          "name": "avatar",
+          "type": "file",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "maxSize": 5242880,
+            "mimeTypes": [
+              "image/jpeg",
+              "image/png",
+              "image/svg+xml",
+              "image/gif",
+              "image/webp"
+            ],
+            "thumbs": null,
+            "protected": false
+          }
+        },
+        {
+          "id": "users_wallet",
+          "name": "wallet",
+          "type": "text",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "users_verified",
+          "name": "verified",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {}
+        }
+      ],
+      "indexes": [],
+      "listRule": "id = @request.auth.id",
+      "viewRule": "id = @request.auth.id",
+      "createRule": "",
+      "updateRule": "id = @request.auth.id",
+      "deleteRule": "id = @request.auth.id",
+      "options": {
+        "allowEmailAuth": true,
+        "allowOAuth2Auth": true,
+        "allowUsernameAuth": false,
+        "exceptEmailDomains": null,
+        "manageRule": null,
+        "minPasswordLength": 8,
+        "onlyEmailDomains": null,
+        "requireEmail": false
+      }
+    },
+    {
+      "id": "apps",
+      "name": "apps",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "apps_name",
+          "name": "name",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "apps_slug",
+          "name": "slug",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": true,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        {
+          "id": "apps_category",
+          "name": "category",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "apps_chain",
+          "name": "chain",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "apps_description",
+          "name": "description",
+          "type": "text",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "apps_logo",
+          "name": "logo",
+          "type": "file",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "maxSize": 5242880,
+            "mimeTypes": [
+              "image/jpeg",
+              "image/png",
+              "image/svg+xml",
+              "image/gif",
+              "image/webp"
+            ],
+            "thumbs": null,
+            "protected": false
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_apps_slug` ON `apps` (`slug`)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id != ''",
+      "updateRule": "@request.auth.id != ''",
+      "deleteRule": "@request.auth.id != ''",
+      "options": {}
+    },
+    {
+      "id": "reviews",
+      "name": "reviews",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "reviews_app",
+          "name": "app",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "collectionId": "apps",
+            "cascadeDelete": false,
+            "minSelect": null,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "reviews_user",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": null,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "reviews_rating",
+          "name": "rating",
+          "type": "number",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 5,
+            "noDecimal": true
+          }
+        },
+        {
+          "id": "reviews_comment",
+          "name": "comment",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "reviews_txHash",
+          "name": "txHash",
+          "type": "text",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "reviews_status",
+          "name": "status",
+          "type": "select",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "pending",
+              "approved",
+              "rejected",
+              "shadowbanned"
+            ]
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX `idx_reviews_app` ON `reviews` (`app`)",
+        "CREATE INDEX `idx_reviews_user` ON `reviews` (`user`)",
+        "CREATE INDEX `idx_reviews_status` ON `reviews` (`status`)"
+      ],
+      "listRule": "status = 'approved' || (@request.auth.id != '' && user = @request.auth.id)",
+      "viewRule": "status = 'approved' || (@request.auth.id != '' && user = @request.auth.id)",
+      "createRule": "@request.auth.id != '' && user = @request.auth.id",
+      "updateRule": "@request.auth.id != '' && user = @request.auth.id",
+      "deleteRule": "@request.auth.id != '' && user = @request.auth.id",
+      "options": {}
+    },
+    {
+      "id": "aggregates",
+      "name": "aggregates",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "aggregates_app",
+          "name": "app",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": true,
+          "options": {
+            "collectionId": "apps",
+            "cascadeDelete": true,
+            "minSelect": null,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "aggregates_score",
+          "name": "score",
+          "type": "number",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 100,
+            "noDecimal": false
+          }
+        },
+        {
+          "id": "aggregates_updated",
+          "name": "updated",
+          "type": "date",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": "",
+            "max": ""
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_aggregates_app` ON `aggregates` (`app`)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id != ''",
+      "updateRule": "@request.auth.id != ''",
+      "deleteRule": null,
+      "options": {}
+    },
+    {
+      "id": "audit_logs",
+      "name": "audit_logs",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "audit_logs_type",
+          "name": "type",
+          "type": "select",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "review_approved",
+              "review_rejected",
+              "review_shadowbanned",
+              "app_created",
+              "app_updated",
+              "user_verified"
+            ]
+          }
+        },
+        {
+          "id": "audit_logs_ref",
+          "name": "ref",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "audit_logs_admin",
+          "name": "admin",
+          "type": "relation",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": null,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "audit_logs_details",
+          "name": "details",
+          "type": "json",
+          "system": false,
+          "required": false,
+          "presentable": false,
+          "unique": false,
+          "options": {
+            "maxSize": 2000000
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX `idx_audit_logs_type` ON `audit_logs` (`type`)",
+        "CREATE INDEX `idx_audit_logs_ref` ON `audit_logs` (`ref`)"
+      ],
+      "listRule": null,
+      "viewRule": null,
+      "createRule": "@request.auth.id != ''",
+      "updateRule": null,
+      "deleteRule": null,
+      "options": {}
+    }
+  ]
+}
